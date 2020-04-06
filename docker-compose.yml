@@ -1,52 +1,39 @@
 version: '3.7'
 
 services:
-  postgres_powerbidata:
-    image: postgres:10-alpine
-    restart: on-failure
-    container_name: postgres_powerbidata
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    ports:
-      - 5433:5432
-    networks:
-      - db
+#  db_powerbi:
+#    image: mcr.microsoft.com/mssql/server:2019-latest
+#    restart: on-failure
+#    container_name: db_powerbi
+#    environment:
+#      ACCEPT_EULA: Y
+#      SA_PASSWORD: ${DB_POWERBI_FLYWAY_PASSWORD}
+#    healthcheck:
+#      test: ["CMD-SHELL", "sqlcmd -S ${DB_POWERBI_HOSTNAME} -U ${DB_POWERBI_FLYWAY_USERNAME} -P ${DB_POWERBI_FLYWAY_PASSWORD} -Q 'SELECT 1' || exit 1"]
+#      interval: 10s
+#      timeout: 3s
+#      retries: 10
+#      start_period: 10s
+#    ports:
+#      - 1433:1433
 
-  public_powerbidata_flyway:
-    image: quay.io/ukhomeofficedigital/docker-flyway:0c81630decc5d7f6c6ec9070d7475b3f3f084153
-    container_name: public_powerbidata_flyway
-    command: /mnt/docker/run.sh
-    working_dir: /mnt
+  flyway_powerbi:
+    image: quay.io/ukhomeofficedigital/docker-flyway:2e37d154f7a6b74f0064a53ce640e449e082d3ca
+    container_name: flyway_powerbi
+    command: >
+      sh -c "/mnt/docker/run.sh"
+    working_dir: /mnt/
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_SERVER: postgres_powerbidata
-      POSTGRES_PORT: 5432
-      FLYWAY_INIT_USER: postgres
-      FLYWAY_INIT_PASSWORD: mysecretpassword
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_OWNER_NAME: ownergovernance
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_OWNER_PASSWORD: mysecretpassword
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_SCHEMA: governance
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_AUTHENTICATOR_USER: authenticatorgovernance
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_AUTHENTICATOR_PASSWORD: auth1234
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_ANON_USER: webanongovernance
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_SERVICE_USER: servicegovernance
-      FLYWAY_PLACEHOLDERS_GOVERNANCE_READONLY_USER: readonlygovernance
+      DB_POWERBI_DATABRICKS_PASSWORD: ${DB_POWERBI_DATABRICKS_PASSWORD}
+      DB_POWERBI_DATABRICKS_USERNAME: ${DB_POWERBI_DATABRICKS_USERNAME}
+      DB_POWERBI_DBNAME: ${DB_POWERBI_DBNAME}
+      DB_POWERBI_FLYWAY_PASSWORD: ${DB_POWERBI_FLYWAY_PASSWORD}
+      DB_POWERBI_FLYWAY_USERNAME: ${DB_POWERBI_FLYWAY_USERNAME}
+      DB_POWERBI_HOSTNAME: ${DB_POWERBI_HOSTNAME}
+      DB_POWERBI_PORT: ${DB_POWERBI_PORT}
+      DB_POWERBI_POWERBI_PASSWORD: ${DB_POWERBI_POWERBI_PASSWORD}
+      DB_POWERBI_POWERBI_USERNAME: ${DB_POWERBI_POWERBI_USERNAME}
     volumes:
-      - ${PUBLIC_REFDATA_FLYWAY}:/mnt
-    depends_on:
-      - postgres_powerbidata
-    networks:
-      - db
-
-networks:
-  db:
-    external:
-      name: db
+      - .:/mnt
+#    depends_on:
+#      - db_powerbi

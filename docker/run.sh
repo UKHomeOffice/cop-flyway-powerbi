@@ -10,8 +10,8 @@ export DB_POWERBI_HOSTNAME=${DB_POWERBI_HOSTNAME}
 export DB_POWERBI_PORT=${DB_POWERBI_PORT}
 export DB_POWERBI_OPTIONS=${DB_POWERBI_OPTIONS}
 export DB_POWERBI_JDBC_OPTIONS=${DB_POWERBI_JDBC_OPTIONS}
-export URL="postgresql://${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_OPTIONS}"
-export FLYWAY_URL="jdbc:"postgresql://${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_JDBC_OPTIONS}""
+export URL="sqlserver://${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_OPTIONS}"
+export FLYWAY_URL="jdbc:"sqlserver://${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_JDBC_OPTIONS}""
 export DB_POWERBI_DEFAULT_USERNAME=${DB_POWERBI_DEFAULT_USERNAME}
 export DB_POWERBI_DEFAULT_PASSWORD=${DB_POWERBI_DEFAULT_PASSWORD}
 export FLYWAY_PLACEHOLDERS_MASTERUSER=${DB_POWERBI_DEFAULT_USERNAME}
@@ -23,17 +23,17 @@ export PGPASSWORD=${DB_POWERBI_DEFAULT_PASSWORD}
 export BASEPATH="${PWD}"
 echo "Running from base path: ${BASEPATH}"
 
-echo "Checking if postgres is up and ready for connections"
+echo "Checking if SQL server is up and ready for connections"
 i=0
 pg_isready -d ${URL} -U ${DB_POWERBI_DEFAULT_USERNAME} -t 60
 PG_EXIT=$?
 while [[ "${i}" -lt "5" && ${PG_EXIT} != 0 ]]
 do
-    echo "waiting for Postgres to start, attempt: ${i}"
+    echo "waiting for SQL Server to start, attempt: ${i}"
     sleep 5s
     if [[ "${i}" > 5 ]]
     then
-        echo "Error: failed waiting for Postgres to start"
+        echo "Error: failed waiting for SQL Server to start"
         exit 1
     fi
     ((i++))
@@ -47,7 +47,7 @@ export FLYWAY_PASSWORD=${DB_POWERBI_DEFAULT_PASSWORD}
 
 
 echo "Checking if database exists"
-STATUS=$( psql postgresql://${DB_POWERBI_DEFAULT_USERNAME}@${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_OPTIONS} -tc "SELECT 1 FROM pg_database WHERE datname='${DB_POWERBI_REFERENCE_DBNAME}'" | sed -e 's/^[ \t]*//')
+STATUS=$( mssql-cli sqlserver//${DB_POWERBI_DEFAULT_USERNAME}@${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_OPTIONS} -tc "SELECT 1 FROM pg_database WHERE datname='${DB_POWERBI_REFERENCE_DBNAME}'" | sed -e 's/^[ \t]*//')
 if [[ "${STATUS}" == "1" ]]
 then
     echo "Database already exists"
@@ -62,7 +62,7 @@ else
     fi
     cd ${BASEPATH}/docker/
     yasha bootstrap.j2 -o /tmp/bootstrap.sql
-    psql postgresql://${DB_POWERBI_DEFAULT_USERNAME}@${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_OPTIONS} < /tmp/bootstrap.sql
+    mssql-cli sqlserver://${DB_POWERBI_DEFAULT_USERNAME}@${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_DEFAULT_DBNAME}${DB_POWERBI_OPTIONS} < /tmp/bootstrap.sql
     if [[ "$?" != 0 ]]
     then
         echo "Error: with bootstrapping database"
@@ -71,7 +71,7 @@ else
 fi
 
 echo "Migrating powerbi database"
-export FLYWAY_URL="jdbc:postgresql://${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_REFERENCE_DBNAME}${DB_POWERBI_JDBC_OPTIONS}"
+export FLYWAY_URL="jdbc:sqlserver://${DB_POWERBI_HOSTNAME}:${DB_POWERBI_PORT}/${DB_POWERBI_REFERENCE_DBNAME}${DB_POWERBI_JDBC_OPTIONS}"
 export FLYWAY_USER=$DB_POWERBI_GOVERNANCE_OWNER_USERNAME}
 export FLYWAY_PASSWORD=$DB_POWERBI_GOVERNANCE_OWNER_PASSWORD}
 export FLYWAY_SCHEMAS=$DB_POWERBI_GOVERNANCE_SCHEMA}

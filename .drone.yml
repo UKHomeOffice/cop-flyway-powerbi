@@ -19,23 +19,23 @@ pipeline:
       environment: secrets
       event: deployment
 
-#  synch_production_secrets:
-#    image: quay.io/ukhomeofficedigital/cop-secrets
-#    environment:
-#      - DRONE_SERVER=https://drone.acp.homeoffice.gov.uk
-#      - DEPLOY_ENV=production
-#    secrets:
-#      - source: PRODUCTION_DRONE_AWS_ACCESS_KEY_ID
-#        target: AWS_ACCESS_KEY_ID
-#      - source: PRODUCTION_DRONE_AWS_SECRET_ACCESS_KEY
-#        target: AWS_SECRET_ACCESS_KEY
-#      - source: DRONE_PUBLIC_TOKEN
-#        target: DRONE_TOKEN
-#    when:
-#      environment: secrets
-#      event: deployment
+  synch_production_secrets:
+    image: quay.io/ukhomeofficedigital/cop-secrets
+    environment:
+      - DRONE_SERVER=https://drone.acp.homeoffice.gov.uk
+      - DEPLOY_ENV=production
+    secrets:
+      - source: PRODUCTION_DRONE_AWS_ACCESS_KEY_ID
+        target: AWS_ACCESS_KEY_ID
+      - source: PRODUCTION_DRONE_AWS_SECRET_ACCESS_KEY
+        target: AWS_SECRET_ACCESS_KEY
+      - source: DRONE_PUBLIC_TOKEN
+        target: DRONE_TOKEN
+    when:
+      environment: secrets
+      event: deployment
 
-  deploy_to_dev::
+  deploy_to_dev:
     image: quay.io/ukhomeofficedigital/docker-flyway:2e37d154f7a6b74f0064a53ce640e449e082d3ca
     secrets:
       - source: DEV_DB_POWERBI_DATABRICKS_PASSWORD
@@ -64,35 +64,35 @@ pipeline:
       branch: master
       event: push
 
-#  deploy_to_prod:
-#    image: quay.io/ukhomeofficedigital/docker-flyway:2e37d154f7a6b74f0064a53ce640e449e082d3ca
-#    secrets:
-#      - source: PRODUCTION_DB_POWERBI_DATABRICKS_PASSWORD
-#        target: DB_POWERBI_DATABRICKS_PASSWORD
-#      - source: PRODUCTION_DB_POWERBI_DATABRICKS_USERNAME
-#        target: DB_POWERBI_DATABRICKS_USERNAME
-#      - source: PRODUCTION_DB_POWERBI_DBNAME
-#        target: DB_POWERBI_DBNAME
-#      - source: PRODUCTION_DB_POWERBI_FLYWAY_PASSWORD
-#        target: DB_POWERBI_FLYWAY_PASSWORD
-#      - source: PRODUCTION_DB_POWERBI_FLYWAY_USERNAME
-#        target: DB_POWERBI_FLYWAY_USERNAME
-#      - source: PRODUCTION_DB_POWERBI_HOSTNAME
-#        target: DB_POWERBI_HOSTNAME
-#      - source: PRODUCTION_DB_POWERBI_OPTIONS
-#        target: DB_POWERBI_OPTIONS
-#      - source: PRODUCTION_DB_POWERBI_PORT
-#        target: DB_POWERBI_PORT
-#      - source: PRODUCTION_DB_POWERBI_POWERBI_PASSWORD
-#        target: DB_POWERBI_POWERBI_PASSWORD
-#      - source: PRODUCTION_DB_POWERBI_POWERBI_USERNAME
-#        target: DB_POWERBI_POWERBI_USERNAME
-#    commands:
-#      - /mnt/docker/run.sh
-#    when:
-#      branch: master
-#      event: deployment
-#      environment: production
+  deploy_to_prod:
+    image: quay.io/ukhomeofficedigital/docker-flyway:2e37d154f7a6b74f0064a53ce640e449e082d3ca
+    secrets:
+      - source: PRODUCTION_DB_POWERBI_DATABRICKS_PASSWORD
+        target: DB_POWERBI_DATABRICKS_PASSWORD
+      - source: PRODUCTION_DB_POWERBI_DATABRICKS_USERNAME
+        target: DB_POWERBI_DATABRICKS_USERNAME
+      - source: PRODUCTION_DB_POWERBI_DBNAME
+        target: DB_POWERBI_DBNAME
+      - source: PRODUCTION_DB_POWERBI_FLYWAY_PASSWORD
+        target: DB_POWERBI_FLYWAY_PASSWORD
+      - source: PRODUCTION_DB_POWERBI_FLYWAY_USERNAME
+        target: DB_POWERBI_FLYWAY_USERNAME
+      - source: PRODUCTION_DB_POWERBI_HOSTNAME
+        target: DB_POWERBI_HOSTNAME
+      - source: PRODUCTION_DB_POWERBI_OPTIONS
+        target: DB_POWERBI_OPTIONS
+      - source: PRODUCTION_DB_POWERBI_PORT
+        target: DB_POWERBI_PORT
+      - source: PRODUCTION_DB_POWERBI_POWERBI_PASSWORD
+        target: DB_POWERBI_POWERBI_PASSWORD
+      - source: PRODUCTION_DB_POWERBI_POWERBI_USERNAME
+        target: DB_POWERBI_POWERBI_USERNAME
+    commands:
+      - /mnt/docker/run.sh
+    when:
+      branch: master
+      event: deployment
+      environment: production
 
   notify:
     image: plugins/slack
